@@ -1,4 +1,4 @@
-import { makeAutoObservable } from "mobx";
+import { makeAutoObservable, observable, action } from "mobx";
 import { GetStoryIds } from "../service";
 import { DB_CONFIG } from "../config/config";
 import firebase from "firebase/app";
@@ -11,7 +11,24 @@ class Store {
   user = "anonymous";
   newsId;
   constructor() {
-    makeAutoObservable(this);
+    makeAutoObservable(this, {
+      storyIds: observable,
+      loading: observable,
+      comments: observable,
+      newComment: observable,
+      user: observable,
+      newsId: observable,
+      onLoadComments: action,
+      getStoryIds: action,
+      setstoryIds: action,
+      setStory: action,
+      setLoading: action,
+      getStoryId: action,
+      addComment: action,
+      handleChange: action,
+      deleteComment: action,
+    });
+    //initialize firebase
     if (!firebase.apps.length) {
       this.myApp = firebase.initializeApp(DB_CONFIG);
     } else {
@@ -19,9 +36,21 @@ class Store {
     }
     this.database = this.myApp.database().ref().child("comments");
   }
-
-  setstoryIds(news) {
-    this.storyIds = news;
+  onLoadComments() {
+    const previousComments = [...store.comments];
+    //Datasnapshot
+    this.database.on("child_added", (snap) => {
+      previousComments.push({
+        id: snap.key,
+        commentContent: snap.val().commentContent,
+        user: snap.val().user,
+        newsId: snap.val().newsId,
+      });
+      store.comments = previousComments;
+    });
+  }
+  setstoryIds(ids) {
+    this.storyIds = ids;
   }
   setStory(storyId) {
     this.story = storyId;
@@ -42,7 +71,6 @@ class Store {
     this.newsId = id;
   }
   addComment() {
-    this.comments.push(this.newComment);
     this.database.push().set({
       commentContent: this.newComment,
       user: this.user,
@@ -53,20 +81,11 @@ class Store {
   handleChange(input) {
     this.newComment = input;
   }
-  onLoadComments() {
-    const previousComments = [...store.comments];
-    //Datasnapshot
-    this.database.on("child_added", (snap) => {
-      previousComments.push({
-        id: snap.key,
-        commentContent: snap.val().commentContent,
-        user: snap.val().user,
-        newsId: snap.val().newsId,
-      });
-      store.comments = previousComments;
-    });
+  deleteComment(noteId) {
+    this.database.child(noteId).remove();
   }
 }
+
 const store = new Store();
 store.getStoryIds();
 store.onLoadComments();

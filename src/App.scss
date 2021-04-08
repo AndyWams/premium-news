@@ -111,6 +111,14 @@ button {
   margin: 1em 0em;
   border-radius: 5px;
 }
+pre {
+  span {
+    &:last-child {
+      font-size: 21px;
+      cursor: pointer;
+    }
+  }
+}
 
 @media screen and (min-width: 320px) and (max-width: 768px) {
   .container {
