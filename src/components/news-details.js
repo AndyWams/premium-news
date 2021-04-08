@@ -54,6 +54,7 @@ const NewsDetails = ({ match }) => {
               <button
                 className="btn--primary"
                 onClick={() => store.addComment()}
+                disabled={store.disabled}
               >
                 Post
               </button>

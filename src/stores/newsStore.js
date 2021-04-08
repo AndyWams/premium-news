@@ -1,8 +1,13 @@
-import { makeAutoObservable, observable, action } from "mobx";
+import { makeAutoObservable, observable, action, configure } from "mobx";
 import { GetStoryIds } from "../service";
 import { DB_CONFIG } from "../config/config";
 import firebase from "firebase/app";
 import "firebase/database";
+//Helper method
+const removeComment = (comments, id) => {
+  return comments.filter((comment) => comment.id !== id);
+};
+
 class Store {
   storyIds = [];
   loading = false;
@@ -10,6 +15,7 @@ class Store {
   newComment = "";
   user = "anonymous";
   newsId;
+  disabled = true;
   constructor() {
     makeAutoObservable(this, {
       storyIds: observable,
@@ -22,11 +28,13 @@ class Store {
       getStoryIds: action,
       setstoryIds: action,
       setStory: action,
-      setLoading: action,
       getStoryId: action,
       addComment: action,
       handleChange: action,
       deleteComment: action,
+    });
+    configure({
+      enforceActions: "never",
     });
     //initialize firebase
     if (!firebase.apps.length) {
@@ -37,17 +45,17 @@ class Store {
     this.database = this.myApp.database().ref().child("comments");
   }
   onLoadComments() {
-    const previousComments = [...store.comments];
+    const previousComments = [...this.comments];
     //Datasnapshot
     this.database.on("child_added", (snap) => {
-      previousComments.push({
+      this.comments.push({
         id: snap.key,
         commentContent: snap.val().commentContent,
         user: snap.val().user,
         newsId: snap.val().newsId,
       });
-      store.comments = previousComments;
     });
+    this.comments = previousComments;
   }
   setstoryIds(ids) {
     this.storyIds = ids;
@@ -55,14 +63,11 @@ class Store {
   setStory(storyId) {
     this.story = storyId;
   }
-  setLoading(val) {
-    this.loading = val;
-  }
   getStoryIds = async () => {
-    store.setLoading(true);
+    this.loading = true;
     await GetStoryIds().then((data) => {
       if (data) {
-        store.setLoading(false);
+        this.loading = false;
         store.setstoryIds(data);
       }
     });
@@ -77,11 +82,18 @@ class Store {
       newsId: this.newsId,
     });
     this.newComment = "";
+    this.disabled = true;
   }
   handleChange(input) {
+    if (input.length > 0) {
+      this.disabled = false;
+    } else {
+      this.disabled = true;
+    }
     this.newComment = input;
   }
   deleteComment(noteId) {
+    this.comments = removeComment(this.comments, noteId);
     this.database.child(noteId).remove();
   }
 }

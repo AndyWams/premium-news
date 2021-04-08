@@ -1,4 +1,4 @@
-import { Fragment } from "react";
+import { Fragment, useEffect } from "react";
 import Story from "./story";
 import Spinner from "./spinner/spinner";
 import { useInfiniteScroll } from "../utils/useInfiniteScroll";
@@ -7,6 +7,11 @@ import { observer } from "mobx-react-lite";
 
 const NewsContainer = () => {
   const { count } = useInfiniteScroll();
+
+  useEffect(() => {
+    const ac = new AbortController();
+    return () => ac.abort();
+  }, []);
   return (
     <Fragment>
       <h1>News Feed</h1>
