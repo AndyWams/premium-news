@@ -1,13 +1,13 @@
 import { observer } from "mobx-react-lite";
 import store from "../stores/newsStore";
 const Comments = () => {
-  const reversedList = [...store.comments];
   return (
     <div className="comments">
       <h4 className="mb-4">Comments</h4>
 
-      {store.comments && store.comments.length > 0 ? (
-        reversedList.reverse().map((comment) => (
+      {store.storiesWithComment &&
+      Object.keys(store.storiesWithComment).length > 0 ? (
+        store.storiesWithComment.map((comment) => (
           <pre
             key={comment.id}
             className="d-flex justify-content-between align-items-center"

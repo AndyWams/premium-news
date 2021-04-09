@@ -1,12 +1,14 @@
-import { makeAutoObservable, observable, action, configure } from "mobx";
+import {
+  makeAutoObservable,
+  observable,
+  action,
+  configure,
+  computed,
+} from "mobx";
 import { GetStoryIds } from "../service";
 import { DB_CONFIG } from "../config/config";
 import firebase from "firebase/app";
 import "firebase/database";
-//Helper method
-const removeComment = (comments, id) => {
-  return comments.filter((comment) => comment.id !== id);
-};
 
 class Store {
   storyIds = [];
@@ -24,17 +26,18 @@ class Store {
       newComment: observable,
       user: observable,
       newsId: observable,
+      disabled: observable,
       onLoadComments: action,
       getStoryIds: action,
-      setstoryIds: action,
-      setStory: action,
       getStoryId: action,
       addComment: action,
       handleChange: action,
       deleteComment: action,
+      storiesWithComment: computed,
     });
     configure({
       enforceActions: "never",
+      useProxies: "never",
     });
     //initialize firebase
     if (!firebase.apps.length) {
@@ -57,18 +60,12 @@ class Store {
     });
     this.comments = previousComments;
   }
-  setstoryIds(ids) {
-    this.storyIds = ids;
-  }
-  setStory(storyId) {
-    this.story = storyId;
-  }
   getStoryIds = async () => {
     this.loading = true;
     await GetStoryIds().then((data) => {
       if (data) {
         this.loading = false;
-        store.setstoryIds(data);
+        this.storyIds = data;
       }
     });
   };
@@ -96,9 +93,19 @@ class Store {
     this.comments = removeComment(this.comments, noteId);
     this.database.child(noteId).remove();
   }
+
+  get storiesWithComment() {
+    const comments_ = [...this.comments];
+    const swc = comments_.filter((comment) => comment.newsId === this.newsId);
+    return this.comments.length !== 0 ? swc : null;
+  }
 }
 
 const store = new Store();
 store.getStoryIds();
 store.onLoadComments();
 export default store;
+//Helper method
+const removeComment = (comments, id) => {
+  return comments.filter((comment) => comment.id !== id);
+};

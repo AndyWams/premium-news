@@ -9,6 +9,7 @@ const NewsDetails = ({ match }) => {
   const [details, setDetails] = useState({});
   const [loading, setLoading] = useState(false);
   store.getStoryId(match.params.id);
+
   useEffect(() => {
     const getItem = async () => {
       try {
@@ -60,7 +61,7 @@ const NewsDetails = ({ match }) => {
               </button>
             </div>
           </div>
-          <Comments />
+          <Comments storyId={match.params.id} />
         </section>
       )}
     </Fragment>

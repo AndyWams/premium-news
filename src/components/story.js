@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { GetStory } from "../service";
 import { MapTime } from "../utils/mappers";
-import { Link } from "react-router-dom";
 const Story = ({ storyId }) => {
   const [story, setStory] = useState([]);
   useEffect(() => {
@@ -14,7 +13,7 @@ const Story = ({ storyId }) => {
     getAllStories();
   }, [storyId]);
   return story && story.url ? (
-    <Link to={`/news-details/${storyId}`}>
+    <a href={`/news-details/${storyId}`}>
       <div className="list-item">
         <div className="item--title">{story.title}</div>
         <div className="small--text">
@@ -24,7 +23,7 @@ const Story = ({ storyId }) => {
           Time: <span>{MapTime(story.time)}</span>
         </div>
       </div>
-    </Link>
+    </a>
   ) : null;
 };
 
