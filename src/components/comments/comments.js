@@ -1,5 +1,5 @@
 import { observer } from "mobx-react-lite";
-import store from "../stores/newsStore";
+import store from "../../stores/newsStore";
 const Comments = () => {
   return (
     <div className="comments">

@@ -1,30 +1,19 @@
-import { useState, useEffect, Fragment } from "react";
-import { GetStory } from "../service";
-import Spinner from "./spinner/spinner";
-import store from "../stores/newsStore";
+import { useEffect, Fragment } from "react";
 import { observer } from "mobx-react-lite";
-import Comments from "./comments";
+import store from "../../stores/newsStore";
+import Spinner from "../spinner/spinner";
+import Comments from "../comments/comments";
 
 const NewsDetails = ({ match }) => {
-  const [details, setDetails] = useState({});
-  const [loading, setLoading] = useState(false);
-  store.getStoryId(match.params.id);
-
+  const { title, by, url } = store.story;
+  const loading = store.loading;
   useEffect(() => {
     const getItem = async () => {
-      try {
-        const paramsId = match.params.id;
-        setLoading(true);
-        await GetStory(paramsId).then((data) => {
-          if (data) {
-            setLoading(false);
-            data && data.url && setDetails(data);
-          }
-        });
-      } catch (ex) {}
+      const storyId = match.params.id;
+      store.getStoryId(storyId);
+      await store.getStory();
     };
     getItem();
-    return () => {};
   }, [match.params.id]);
 
   return (
@@ -36,10 +25,10 @@ const NewsDetails = ({ match }) => {
           <h1>News Details</h1>
           <hr />
           <div className="details-content">
-            <div className="item--title">{details.title}</div>
-            <div className="small--text">by: {details.by}</div>
+            <div className="item--title">{title}</div>
+            <div className="small--text">by: {by}</div>
             <div className="item--url">
-              <a href={details.url} target="_blank" rel="noreferrer">
+              <a href={url} target="_blank" rel="noreferrer">
                 Read more...
               </a>
             </div>
@@ -61,7 +50,7 @@ const NewsDetails = ({ match }) => {
               </button>
             </div>
           </div>
-          <Comments storyId={match.params.id} />
+          <Comments />
         </section>
       )}
     </Fragment>

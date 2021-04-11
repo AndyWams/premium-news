@@ -5,13 +5,14 @@ import {
   configure,
   computed,
 } from "mobx";
-import { GetStoryIds } from "../service";
+import { GetStoryIds, GetStory } from "../service";
 import { DB_CONFIG } from "../config/config";
 import firebase from "firebase/app";
 import "firebase/database";
 
 class Store {
   storyIds = [];
+  story = {};
   loading = false;
   comments = [];
   newComment = "";
@@ -21,6 +22,8 @@ class Store {
   constructor() {
     makeAutoObservable(this, {
       storyIds: observable,
+      stories: observable,
+      story: observable,
       loading: observable,
       comments: observable,
       newComment: observable,
@@ -30,6 +33,7 @@ class Store {
       onLoadComments: action,
       getStoryIds: action,
       getStoryId: action,
+      getStory: action,
       addComment: action,
       handleChange: action,
       deleteComment: action,
@@ -72,6 +76,15 @@ class Store {
   getStoryId(id) {
     this.newsId = id;
   }
+  getStory = async () => {
+    this.loading = true;
+    await GetStory(this.newsId).then((data) => {
+      if (data && data.url) {
+        this.loading = false;
+        this.story = data;
+      }
+    });
+  };
   addComment() {
     this.database.push().set({
       commentContent: this.newComment,
@@ -89,11 +102,10 @@ class Store {
     }
     this.newComment = input;
   }
-  deleteComment(noteId) {
-    this.comments = removeComment(this.comments, noteId);
-    this.database.child(noteId).remove();
+  deleteComment(postId) {
+    this.comments = removeComment(this.comments, postId);
+    this.database.child(postId).remove();
   }
-
   get storiesWithComment() {
     const comments_ = [...this.comments];
     const swc = comments_.filter((comment) => comment.newsId === this.newsId);

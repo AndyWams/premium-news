@@ -5,11 +5,11 @@ import {
   Switch,
   Redirect,
 } from "react-router-dom";
-import NewsContainer from "./components/news-container";
-import Header from "./components/header";
+import NewsContainer from "./components/news-container/news-container";
+import Header from "./components/header/header";
 import "./App.scss";
-import NewsDetails from "./components/news-details";
-import NotFound from "./components/notfound";
+import NewsDetails from "./components/news-details/news-details";
+import NotFound from "./components/notfound/notfound";
 
 function App() {
   return (

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { GetStory } from "../service";
-import { MapTime } from "../utils/mappers";
+import { GetStory } from "../../service";
+import { MapTime } from "../../utils/mappers";
 const Story = ({ storyId }) => {
   const [story, setStory] = useState([]);
   useEffect(() => {
